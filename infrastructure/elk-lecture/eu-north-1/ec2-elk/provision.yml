@@ -6,5 +6,5 @@
     - role: upgrade_packages
     - role: node_exporter
     - role: kernel_tuning
-    - {role: create_users, username: 'example', uid: '1234', gid: '1234', additional_groups: ['sudo'], sudoer: 'yes'}
-    - {role: docker, docker_users: ['example']}
+    - {role: create_users, username: 'admin', uid: '1234', gid: '1234', additional_groups: ['sudo'], sudoer: 'yes'}
+    - {role: docker, docker_users: ['admin']}
