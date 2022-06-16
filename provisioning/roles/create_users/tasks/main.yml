@@ -1,0 +1,71 @@
+---
+- name: Install pip3
+  apt:
+    name: python3-pip
+    update_cache: yes
+    state: latest
+  when: sudoer == 'no'
+
+- name: Install pexpect
+  pip:
+    name: pexpect==4.8.*
+    state: present
+    executable: pip3
+  when: sudoer == 'no'
+
+- name: "Check if user {{ username }} exists"
+  shell: "id -u {{ username }}"
+  register: check_user
+  ignore_errors: true
+
+- name: "Check if group {{ username }} exists"
+  shell: "/usr/bin/getent group {{ username }} | cut -d':' -f 3"
+  register: check_group
+  ignore_errors: true
+
+- name: "Ensure {{ username }} group removed"
+  group:
+    name: "{{ username }}"
+    state: absent
+  when: "check_group.stdout != '{{ gid }}'"
+  ignore_errors: true
+
+- name: "Create group {{ username }}"
+  group:
+    name: "{{ username }}"
+    gid: "{{ gid }}"
+    state: present
+
+- name: "Create {{ username }} user"
+  user:
+    name: "{{ username }}"
+    uid: "{{ uid }}"
+    shell: /bin/bash
+    group: "{{ primary_group }}"
+    password: "{{ password }}"
+    update_password: on_create
+
+- name: "Ensure {{ additional_groups }} groups exist"
+  group:
+    name: "{{ item }}"
+    gid: "{{ gid|int + 10 }}"
+    state: present
+  with_items:
+    - "{{ additional_groups }}"
+  ignore_errors: true
+
+- name: "Add {{ username }} to additional groups"
+  user:
+    name: "{{ username }}"
+    groups: "{{ additional_groups }}"
+    append: yes
+  when: additional_groups != ""
+
+- name: Allow sudo group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%sudo'
+    line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+  when: sudoer == 'yes'

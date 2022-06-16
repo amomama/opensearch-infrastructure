@@ -1,0 +1,11 @@
+---
+## create_users ##
+username:
+primary_group: "{{ username }}"
+uid:
+gid:
+sudoer:
+# ^ yes/no
+
+password:
+additional_groups:

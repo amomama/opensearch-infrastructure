@@ -1,0 +1,10 @@
+version: '3'
+services:
+    logstash:
+        image: {{ image }}
+        container_name: logstash
+        network_mode: "host"
+        volumes:
+            - ./logstash.yml:/usr/share/logstash/config/logstash.yml
+            - ./jvm.options:/usr/share/logstash/config/jvm.options
+        restart: always

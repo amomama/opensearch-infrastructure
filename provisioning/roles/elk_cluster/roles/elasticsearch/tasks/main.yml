@@ -1,0 +1,55 @@
+---
+- pip: # dependencies for aws cli
+    name:
+      - boto==2.49.0
+      - boto3==1.16.14
+      - botocore==1.19.14
+      - requests==2.24.0
+    executable: pip3
+    extra_args: "--upgrade"
+
+- name: Copy elasticsearch docker-compose file
+  template:
+    src: ../templates/docker-compose.yml.j2
+    dest: "{{ ansible_env.HOME }}/elasticsearch.docker-compose.yml"
+    mode: 0644
+
+- name: Copy opensearch.yml template
+  template:
+    src: ../templates/opensearch.yml.j2
+    dest: "{{ ansible_env.HOME }}/opensearch.yml"
+    mode: 0644
+
+- name: Copy security configuration files
+  copy:
+    src: ../templates/{{ item }}
+    dest: "{{ ansible_env.HOME }}"
+    mode: 0644
+  loop:
+    - "config.yml"
+
+- name: Copy certificates from S3
+  shell: "aws s3 cp s3://{{ certificates_bucket_path }}/{{ item }} ~/ssl/{{ item }}"
+  loop:
+    - "fullchain.pem"
+    - "privkey.pem"
+
+- name: Create performance-analyzer-rca config directories
+  file:
+    path: "{{ ansible_env.HOME }}/performance-analyzer-rca/config"
+    state: directory
+
+- name: Copy performance-analyzer-rca config
+  copy:
+    src: ../files/usr/share/elasticsearch/performance-analyzer-rca/config/log4j2.xml
+    dest: "{{ ansible_env.HOME }}/performance-analyzer-rca/config/log4j2.xml"
+    mode: 0644
+
+- name: Run docker-compose
+  shell: docker-compose -f {{ ansible_env.HOME }}/elasticsearch.docker-compose.yml up -d
+
+- name: Prune docker images
+  docker_prune:
+    images: yes
+    images_filters:
+      dangling: true

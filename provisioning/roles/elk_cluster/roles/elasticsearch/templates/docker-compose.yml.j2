@@ -1,0 +1,48 @@
+version: '3'
+services:
+
+  {{ container_name }}:
+    image: {{ image }}
+    container_name: {{ container_name }}
+    hostname: {{ container_name }}
+    network_mode: "host"
+    environment:
+      - node.name={{ container_name }}
+{% if node_roles is defined %}
+      - node.roles={{ node_roles }}
+{% else %}
+      - node.data=false
+      - node.master=false
+      - node.ingest=false
+      - node.remote_cluster_client=false
+{% endif %}
+      - cluster.initial_cluster_manager_nodes={{ cluster_initial_master_nodes }}
+      - cluster.name={{ cluster_name }}
+{% if node_attr_data is defined %}
+      - node.attr.temp={{ node_attr_data }}
+{% endif %}
+      - discovery.seed_hosts={{ discovery_seed_hosts }}
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - bootstrap.memory_lock={{ bootstrap_memory_lock }}
+      - logger.org.elasticsearch.discovery={{ logger_org_elasticsearch_discovery }}
+      - "OPENSEARCH_JAVA_OPTS=-Xms{{ Xms }} -Xmx{{ Xmx }}"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - {{ container_name }}:/usr/share/opensearch/data
+      - ./opensearch.yml:/usr/share/opensearch/config/opensearch-security/opensearch.yml
+      - ./config.yml:/usr/share/opensearch/config/opensearch-security/config.yml
+      - ./ssl/fullchain.pem:/usr/share/opensearch/config/fullchain.pem
+      - ./ssl/privkey.pem:/usr/share/opensearch/config/privkey.pem
+      - ./performance-analyzer-rca/config/log4j2.xml:/usr/share/opensearch/performance-analyzer-rca/config/log4j2.xml
+    restart: always
+
+volumes:
+  {{ container_name }}:
+      driver: local

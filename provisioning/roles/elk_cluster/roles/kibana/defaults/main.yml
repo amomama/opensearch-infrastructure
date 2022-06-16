@@ -1,0 +1,5 @@
+---
+image: opensearchproject/opensearch-dashboards:2.0.0
+elasticsearch_hosts: https://coordinating-node.example.com:9200
+
+certificates_bucket_path: my-bucket/kibana.example.com

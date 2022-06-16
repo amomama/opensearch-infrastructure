@@ -1,0 +1,75 @@
+---
+- name: Install python3-pip packages
+  apt:
+    name: python3-pip
+    update_cache: yes
+    state: present
+
+- name: Install boto3 packages
+  pip:
+    name: boto3==1.16.34
+    state: present
+    executable: pip3
+
+- name: Delete /opt/node_exporter file
+  file:
+    path: /opt/node_exporter
+    state: absent
+
+- name: Create node_exporter directory
+  file:
+    path: /opt/node_exporter
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Get DEB architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
+
+- name: Download node_exporter archive
+  unarchive:
+    src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ deb_architecture.stdout }}.tar.gz"
+    remote_src: yes
+    dest: /tmp
+
+- name: Copy node_exporter executable
+  copy:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ deb_architecture.stdout }}/node_exporter"
+    dest: /opt/node_exporter/node_exporter
+    remote_src: yes
+
+- name: Make node_exporter executable
+  file:
+    path: /opt/node_exporter/node_exporter
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Clean /tmp/node_exporter-{{ node_exporter_version }}.linux-{{ deb_architecture.stdout }} folder"
+  file:
+    path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-{{ deb_architecture.stdout }}"
+    state: absent
+
+- name: Create directory for textfile collector
+  file:
+    path: /var/lib/node_exporter/textfile_collector/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Transfer node_exporter.service file
+  copy:
+    src: ../files/node_exporter.service
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Enable and start node_exporter.service
+  systemd:
+    name: node_exporter.service
+    state: started
+    enabled: yes

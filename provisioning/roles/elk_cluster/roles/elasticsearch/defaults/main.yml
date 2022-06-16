@@ -1,0 +1,17 @@
+# this is global config for each node
+# you can override these variables in hosts
+---
+image: opensearchproject/opensearch:2.0.0
+container_name:
+cluster_name: es-docker-cluster
+# replace with private ips of your instances
+discovery_seed_hosts: master-node.example.com:9300,data1-warm-node.example.com:9300,coordinating-node.example.com:9300,data2-cold-node.example.com:9300,data3-hot-node.example.com:9300,data4-hot-node.example.com:9300
+cluster_initial_master_nodes: master-node,data3-node,data4-hot-node
+bootstrap_memory_lock: "true"
+logger_org_elasticsearch_discovery: INFO
+# adjust according to your instance resources
+Xms: 1536m
+Xmx: 1536m
+
+certificates_bucket_path: my-bucket/example.com
+admin_certificates_bucket_path: my-bucket/admin.example.com

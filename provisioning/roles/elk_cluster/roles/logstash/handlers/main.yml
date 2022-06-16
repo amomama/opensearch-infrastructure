@@ -1,0 +1,3 @@
+---
+- name: recreate logstash
+  shell: docker-compose -f {{ ansible_env.HOME }}/logstash.docker-compose.yml up -d --force-recreate

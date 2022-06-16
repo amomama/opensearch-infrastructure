@@ -1,0 +1,21 @@
+---
+- name: Copy kibana docker-compose file
+  template:
+    src: ../templates/docker-compose.yml.j2
+    dest: "{{ ansible_env.HOME }}/kibana.docker-compose.yml"
+    mode: 0644
+
+- name: Copy opensearch_dashboards.yml template
+  template:
+    src: ../templates/opensearch_dashboards.yml.j2
+    dest: "{{ ansible_env.HOME }}/opensearch_dashboards.yml"
+    mode: 0644
+
+- name: Copy certificates from S3
+  shell: "aws s3 cp s3://{{ certificates_bucket_path }}/{{ item }} ~/ssl/{{ item }}"
+  with_items:
+    - "fullchain.pem"
+    - "privkey.pem"
+
+- name: Run docker-compose
+  shell: docker-compose -f {{ ansible_env.HOME }}/kibana.docker-compose.yml up -d

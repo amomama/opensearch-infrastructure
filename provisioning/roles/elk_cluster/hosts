@@ -1,0 +1,23 @@
+[master-node]
+master-node.example.com container_name="master-node" node_roles='cluster_manager' Xms=3072m Xmx=3072m
+
+[data1-warm-node]
+data1-warm-node.example.com container_name="data1-warm-node" node_attr_data="warm" node_roles='cluster_manager,data' Xms=3072m Xmx=3072m
+
+[data2-cold-node]
+data2-cold-node.example.com container_name="data2-cold-node" node_attr_data="cold" node_roles='cluster_manager,data' Xms=3072m Xmx=3072m
+
+[data3-hot-node]
+data3-hot-node.example.com container_name="data3-hot-node" node_attr_data="hot" node_roles='cluster_manager,data' Xms=3072m Xmx=3072m
+
+[data4-hot-node]
+data4-hot-node.example.com container_name="data4-hot-node" node_attr_data="hot" node_roles='cluster_manager,data' Xms=3072m Xmx=3072m
+
+[coordinating-node]
+coordinating-node.example.com container_name="coordinating-node" Xms=3072m Xmx=3072m
+
+[kibana]
+kibana.example.com
+
+[logstash]
+logstash.example.com Xms=3072m Xmx=3072m

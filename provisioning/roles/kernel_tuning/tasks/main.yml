@@ -1,0 +1,8 @@
+---
+- name: Add sysctl tweak
+  blockinfile:
+    insertafter: "#fs.protected_symlinks.*"
+    block: "{{ lookup('file', '../files/sysctl_tweaks.txt') }}"
+    dest: /etc/sysctl.conf
+    backup: yes
+    validate: /sbin/sysctl -p %s

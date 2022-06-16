@@ -1,0 +1,33 @@
+---
+- name: Copy logstash docker-compose file
+  template:
+    src: ../templates/docker-compose.yml.j2
+    dest: "{{ ansible_env.HOME }}/logstash.docker-compose.yml"
+    owner: admin
+    group: admin
+    mode: 0644
+
+- name: Copy logstash jvm.options file
+  template:
+    src: ../templates/jvm.options.j2
+    dest: "{{ ansible_env.HOME }}/jvm.options"
+    owner: admin
+    group: admin
+    mode: 0644
+  notify:
+    - recreate logstash
+
+- name: Copy necessary files
+  copy:
+    src: ../templates/{{ item }}
+    dest: "{{ ansible_env.HOME }}"
+    owner: admin
+    group: admin
+    mode: 0644
+  loop:
+    - "logstash.yml"
+  notify:
+    - recreate logstash
+
+- name: Run docker-compose
+  shell: docker-compose -f {{ ansible_env.HOME }}/logstash.docker-compose.yml up -d

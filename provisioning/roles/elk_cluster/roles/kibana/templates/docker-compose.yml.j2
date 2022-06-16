@@ -1,0 +1,19 @@
+version: '3'
+services: 
+    kibana:
+        image: {{ image }}
+        container_name: kibana
+        volumes:
+          - ./ssl/fullchain.pem:/usr/share/opensearch-dashboards/config/fullchain.pem
+          - ./ssl/privkey.pem:/usr/share/opensearch-dashboards/config/privkey.pem
+          - ./opensearch_dashboards.yml:/usr/share/opensearch-dashboards/config/opensearch_dashboards.yml
+        networks:
+          - kibana-network
+        ports: 
+            - 443:5601
+        restart: always
+
+networks:
+  kibana-network:
+    name: kibana-network
+    driver: bridge
